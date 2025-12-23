@@ -2,7 +2,6 @@
 
 set -euo pipefail
 
-# TODO: Ensure this is the correct GitHub homepage where releases can be downloaded for curlie.
 GH_REPO="https://github.com/rs/curlie"
 TOOL_NAME="curlie"
 TOOL_TEST="curlie --help"
@@ -13,11 +12,6 @@ fail() {
 }
 
 curl_opts=(-fsSL)
-
-# NOTE: You might want to remove this if curlie is not hosted on GitHub releases.
-if [ -n "${GITHUB_API_TOKEN:-}" ]; then
-	curl_opts=("${curl_opts[@]}" -H "Authorization: token $GITHUB_API_TOKEN")
-fi
 
 sort_versions() {
 	sed 'h; s/[+-]/./g; s/.p\([[:digit:]]\)/.z\1/; s/$/.z/; G; s/\n/ /' |
@@ -31,18 +25,39 @@ list_github_tags() {
 }
 
 list_all_versions() {
-	# TODO: Adapt this. By default we simply list the tag names from GitHub releases.
-	# Change this function if curlie has other means of determining installable versions.
 	list_github_tags
 }
 
+get_platform() {
+  local os
+  os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+
+  case "${os}" in
+    darwin) echo "darwin" ;;
+    linux) echo "linux" ;;
+    *) fail "Unsupported platform: ${os}" ;;
+  esac
+}
+
+get_arch() {
+  local arch
+  arch="$(uname -m)"
+
+  case "${arch}" in
+    x86_64) echo "amd64" ;;
+    aarch64|arm64) echo "arm64" ;;
+    i386|i686) echo "386" ;;
+    armv7l) echo "armv7" ;;
+    *) fail "Unsupported architecture: ${arch}" ;;
+  esac
+}
 download_release() {
-	local version filename url
+	local version filename platform arch url
 	version="$1"
 	filename="$2"
-
-	# TODO: Adapt the release URL convention for curlie
-	url="$GH_REPO/archive/v${version}.tar.gz"
+  platform="$(get_platform)"
+  arch="$(get_arch)"
+	url="$GH_REPO/releases/download/v${version}/curlie_${version}_${platform}_${arch}.tar.gz"
 
 	echo "* Downloading $TOOL_NAME release $version..."
 	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
@@ -61,7 +76,6 @@ install_version() {
 		mkdir -p "$install_path"
 		cp -r "$ASDF_DOWNLOAD_PATH"/* "$install_path"
 
-		# TODO: Assert curlie executable exists.
 		local tool_cmd
 		tool_cmd="$(echo "$TOOL_TEST" | cut -d' ' -f1)"
 		test -x "$install_path/$tool_cmd" || fail "Expected $install_path/$tool_cmd to be executable."
