@@ -29,34 +29,34 @@ list_all_versions() {
 }
 
 get_platform() {
-  local os
-  os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+	local os
+	os="$(uname -s | tr '[:upper:]' '[:lower:]')"
 
-  case "${os}" in
-    darwin) echo "darwin" ;;
-    linux) echo "linux" ;;
-    *) fail "Unsupported platform: ${os}" ;;
-  esac
+	case "${os}" in
+	darwin) echo "darwin" ;;
+	linux) echo "linux" ;;
+	*) fail "Unsupported platform: ${os}" ;;
+	esac
 }
 
 get_arch() {
-  local arch
-  arch="$(uname -m)"
+	local arch
+	arch="$(uname -m)"
 
-  case "${arch}" in
-    x86_64) echo "amd64" ;;
-    aarch64|arm64) echo "arm64" ;;
-    i386|i686) echo "386" ;;
-    armv7l) echo "armv7" ;;
-    *) fail "Unsupported architecture: ${arch}" ;;
-  esac
+	case "${arch}" in
+	x86_64) echo "amd64" ;;
+	aarch64 | arm64) echo "arm64" ;;
+	i386 | i686) echo "386" ;;
+	armv7l) echo "armv7" ;;
+	*) fail "Unsupported architecture: ${arch}" ;;
+	esac
 }
 download_release() {
 	local version filename platform arch url
 	version="$1"
 	filename="$2"
-  platform="$(get_platform)"
-  arch="$(get_arch)"
+	platform="$(get_platform)"
+	arch="$(get_arch)"
 	url="$GH_REPO/releases/download/v${version}/curlie_${version}_${platform}_${arch}.tar.gz"
 
 	echo "* Downloading $TOOL_NAME release $version..."
