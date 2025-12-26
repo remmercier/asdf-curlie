@@ -32,7 +32,7 @@ download_release() {
 	local version filename
 	version="$1"
 	filename="$2"
-	url="$GH_REPO/archive/v${version}.tar.gz"
+	url="$GH_REPO/archive/${version}.tar.gz"
 
 	echo "* Downloading $TOOL_NAME release $version..."
 	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
@@ -112,7 +112,7 @@ install_version() {
 		compile_source "$ASDF_DOWNLOAD_PATH"
 
 		# Install binary
-		install_binary "$ASDF_DOWNLOAD_PATH" "$install_path" "curlie"
+		install_binary "$ASDF_DOWNLOAD_PATH" "$install_path" "rgr"
 
 		# Verify installation
 		local tool_cmd
